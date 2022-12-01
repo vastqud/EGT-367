@@ -63,7 +63,7 @@ void update_inputs() {
         if ((debounce_cycles - last_times[pin]) >= debounce_time) { //debounced
             button_states[pin] = button_state
 
-            if (button_state == 1) { //if pin is being turned off, unflag it as being held
+            if (button_state == 1 && previous_state == 0) { //if pin is being turned off, unflag it as being held
                 held_pins[pin] = 0;
             }
         }
