@@ -22,7 +22,7 @@ int held_pins[4] = {
 
 int num = 11;
 int timer_counter = 0;
-int debounce_cycles = 0;
+long int debounce_cycles = 0;
 int debounce_time = 10; //debounce cycles
 int enabled = 1;
 
