@@ -22,8 +22,8 @@ int held_pins[4] = {
 
 int num = 11;
 int timer_counter = 0;
-int milliseconds = 0;
-int debounce_time = 10; //milliseconds
+int debounce_cycles = 0;
+int debounce_time = 10; //debounce cycles
 int enabled = 1;
 
 void update_display(tens, ones) {
@@ -56,11 +56,11 @@ void update_inputs() {
         int previous_state = previous_states[pin];
 
         if (previous_state != button_state) { //state changed
-            last_times[pin] = milliseconds;
+            last_times[pin] = debounce_cycles;
             previous_states[pin] = button_state;
         }
 
-        if ((milliseconds - last_times[pin]) >= debounce_time) { //debounced
+        if ((debounce_cycles - last_times[pin]) >= debounce_time) { //debounced
             button_states[pin] = button_state
 
             if (button_state == 1) { //if pin is being turned off, unflag it as being held
@@ -85,7 +85,7 @@ int main() {
             num = 0;
         }
 
-        milliseconds = milliseconds + 1;
+        debounce_cycles = debounce_cycles + 1;
         int tens = num / 10;
         int ones = num % 10;
 
@@ -96,11 +96,11 @@ int main() {
             num++;
             held_pins[0] = 1; //flag pin as held
         }
-        if (((button_states[0] == 0) && held_pins[1] == 0) {
+        if (((button_states[1] == 0) && held_pins[1] == 0) {
             num--;
             held_pins[1] = 1;
         }
-        if ((button_states[0] == 0) && held_pins[2] == 0)) {
+        if ((button_states[2] == 0) && held_pins[2] == 0)) {
             num = 0;
             held_pins[2] = 1;
         }
@@ -111,5 +111,12 @@ int main() {
 
 #pragma vector = TIMER0_A0_VECTOR
 __interrupt void TimerA(void) {
-    //milliseconds = milliseconds + 50;
+    if (enabled == 1) {
+        timer_counter++
+    }
+
+    if (timer_counter > 20) {
+        num++
+        timer_counter = 0
+    }
 }
