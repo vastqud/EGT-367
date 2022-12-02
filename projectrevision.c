@@ -24,7 +24,7 @@ int num = 11;
 int timer_counter = 0;
 long int debounce_cycles = 0;
 int debounce_time = 10; //debounce cycles
-int enabled = 1;
+int enabled = 0;
 
 void update_display(tens, ones) {
     P8OUT = display_codes[tens]; //display tens place
@@ -55,12 +55,12 @@ void update_inputs() {
         int button_state = pin_mask & P2IN;
         int previous_state = previous_states[pin];
 
-        if (previous_state != button_state) { //state changed
+        if (previous_state != button_state) { //state changed (button was pressed or is currently bouncing)
             last_times[pin] = debounce_cycles;
             previous_states[pin] = button_state;
         }
 
-        if ((debounce_cycles - last_times[pin]) >= debounce_time) { //debounced
+        if ((debounce_cycles - last_times[pin]) >= debounce_time) { //debounced (state is stable)
             button_states[pin] = button_state
 
             if (button_state == 1 && previous_state == 0) { //if pin is being turned off, unflag it as being held
@@ -73,9 +73,9 @@ void update_inputs() {
 int main() {
     P8DIR |= 0xFF; //p8 as output
     P2DIR &= ~0xFF; //p2 as input
-    P7DIR |= 0x0C;
-    WDTCTL = WDTPW + WDTHOLD;
+    P7DIR |= 0x0C; //display latch setup
 
+    WDTCTL = WDTPW + WDTHOLD;
     TA0CCTL0 = CCIE;
 
     while (1) {
@@ -92,17 +92,21 @@ int main() {
         update_display(tens, ones);
         update_inputs();
 
-        if ((button_states[0] == 0) && held_pins[0] == 0) { //if pin is on and it's not being held
+        if ((button_states[0] == 0) && (held_pins[0] == 0)) { //if button is pressed and it's not being held
             num++;
-            held_pins[0] = 1; //flag pin as held
+            held_pins[0] = 1; //flag button as being held down
         }
-        if (((button_states[1] == 0) && held_pins[1] == 0) {
+        if ((button_states[1] == 0) && (held_pins[1] == 0)) {
             num--;
             held_pins[1] = 1;
         }
-        if ((button_states[2] == 0) && held_pins[2] == 0)) {
+        if ((button_states[2] == 0) && (held_pins[2] == 0)) {
             num = 0;
             held_pins[2] = 1;
+        }
+        if ((button_states[3] == 0) && (held_pins[3] == 0)) {
+            enabled = !enabled;
+            held_pins[3] = 1;
         }
     }
 
