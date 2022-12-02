@@ -117,9 +117,9 @@ int main() {
         debounce_cycles = debounce_cycles + 1;
         int tens = num / 10;
         int ones = num % 10;
-        int decimal_percent = decimal / 0.01;
-        int tenths = decimal_percent / 10;
-        int hundredths = decimal_percent % 10;
+        int decimal_whole = decimal * 100;
+        int tenths = decimal_whole / 10;
+        int hundredths = decimal_whole % 10;
 
         update_display(tens, ones, tenths, hundredths);
         update_inputs();
