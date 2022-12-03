@@ -21,7 +21,7 @@ int held_pins[4] = {
     0, 0, 0, 0
 };
 
-int num = 11;
+int num = 0;
 double decimal = 0;
 
 int timer_counter = 0;
@@ -80,20 +80,22 @@ void update_inputs() {
     for (pin = 0; pin < 4; pin++) {
         int pin_mask = input_masks[pin];
         int button_state = pin_mask & P2IN;
-        int previous_state = previous_states[pin];
 
-        if (previous_state != button_state) { //state changed (button was pressed or is currently bouncing)
-            last_times[pin] = debounce_cycles;
-            previous_states[pin] = button_state;
+        if (previous_states[pin] != button_state) { //state changed (button was pressed or is currently bouncing)
+            last_times[pin] = debounce_cycles; //reset debounce timer
         }
 
         if ((debounce_cycles - last_times[pin]) >= debounce_time) { //debounced (state is stable)
-            button_states[pin] = button_state
+            if (button_state != button_states[pin]) { //if the new debounced state is different than the current stable state
+                button_states[pin] = button_state //set new current stable state
 
-            if (button_state == 1 && previous_state == 0) { //if pin is being turned off, unflag it as being held
-                held_pins[pin] = 0;
+                if (button_state == 1) { //if pin is being turned off, unflag it as being held
+                    held_pins[pin] = 0;
+                }
             }
         }
+
+        previous_states[pin] = button_state;
     }
 }
 
@@ -106,7 +108,9 @@ int main() {
     TA0CCTL0 = CCIE;
     //TODO: set up TimerA register
     while (1) {
-        if ((num < 0) || (num > 59)) {
+        if (num < 0) {
+            num = 59;
+        } else if (num > 59) {
             num = 0;
             decimal = 0;
         }
@@ -125,20 +129,20 @@ int main() {
         update_inputs();
 
         if ((button_states[0] == 0) && (held_pins[0] == 0)) { //if button is pressed and it's not being held
-            num++;
+            num++; //increment
             held_pins[0] = 1; //flag button as being held down
         }
         if ((button_states[1] == 0) && (held_pins[1] == 0)) {
-            num--;
+            num--; //decrement
             held_pins[1] = 1;
         }
         if ((button_states[2] == 0) && (held_pins[2] == 0)) {
             num = 0;
-            decimal = 0;
+            decimal = 0; //reset
             held_pins[2] = 1;
         }
         if ((button_states[3] == 0) && (held_pins[3] == 0)) {
-            enabled = !enabled;
+            enabled = !enabled; //toggle stopwatch
             held_pins[3] = 1;
         }
     }
@@ -155,7 +159,7 @@ __interrupt void TimerA(void) {
 
     if (timer_counter >= 20) {
         num++ //increment whole number seconds
-        decimal = 0; //reset decimal precision
+        decimal = 0; //reset decimal
         timer_counter = 0
     }
 }
