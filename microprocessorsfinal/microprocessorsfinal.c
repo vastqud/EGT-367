@@ -14,7 +14,7 @@ int button_states[4] = {
 int previous_states[4] = {
     1, 1, 1, 1
 };
-int last_times[4] = {
+long int last_times[4] = {
     0, 0, 0, 0
 };
 int held_pins[4] = {
@@ -28,7 +28,7 @@ int timer_counter = 0;
 int enabled = 0;
 
 long int debounce_cycles = 0;
-int debounce_time = 10; //debounce cycles
+int debounce_time = 5; //debounce cycles
 
 void update_display(tens, ones, tenths, hundredths) {
     P8OUT = display_codes[tens]; //display tens place
@@ -80,14 +80,18 @@ void update_inputs() {
     for (pin = 0; pin < 4; pin++) {
         int pin_mask = input_masks[pin];
         int button_state = pin_mask & P2IN;
+        
+        if (button_state > 0) { //off
+            button_state = 1; //0x02 & 0xFD for example is 0000 0010 (2 in decimal). so if it's greater than 0, means the button is off.
+        }
 
         if (previous_states[pin] != button_state) { //state changed (button was pressed or is currently bouncing)
             last_times[pin] = debounce_cycles; //reset debounce timer
         }
 
-        if ((debounce_cycles - last_times[pin]) >= debounce_time) { //debounced (state is stable)
+        if ((debounce_cycles - last_times[pin]) > debounce_time) { //debounced (state is stable)
             if (button_state != button_states[pin]) { //if the new debounced state is different than the current stable state
-                button_states[pin] = button_state //set new current stable state
+                button_states[pin] = button_state; //set new current stable state
 
                 if (button_state == 1) { //if pin is being turned off, unflag it as being held
                     held_pins[pin] = 0;
@@ -118,7 +122,7 @@ int main() {
             decimal = 0;
         }
 
-        debounce_cycles = debounce_cycles + 1;
+        debounce_cycles++;
         int tens = num / 10;
         int ones = num % 10;
         int decimal_whole = decimal * 100;
