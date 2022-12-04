@@ -155,7 +155,7 @@ int main() {
 }
 
 #pragma vector = TIMER0_A0_VECTOR
-__interrupt void TimerA(void) {
+__interrupt void TimerA(void) { //interrupt is triggered every 50ms
     if (enabled == 1) {
         timer_counter++
         decimal = decimal + 0.05; //increase decimal precision by 50ms
