@@ -82,7 +82,7 @@ void update_inputs() {
         int button_state = pin_mask & P2IN;
 
         if (button_state > 0) { //off
-            button_state = 1; //0x02 & 0xFD (P2IN) for example is 0000 0010 (2 in decimal). so if it's greater than 0, means the button is not pressed
+            button_state = 1; //0x02 & 0xFD (P2IN) for example is 0000 0010 (2 in decimal). so if it's greater than 0, means the button is not pressed regardless of input mask
         }
 
         if (previous_states[pin] != button_state) { //state changed (button was pressed or is currently bouncing)
