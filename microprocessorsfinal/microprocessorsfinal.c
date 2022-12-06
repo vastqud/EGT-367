@@ -108,7 +108,7 @@ int main() {
     P2DIR &= ~0xFF; //p2 as input
     P7DIR |= 0x0C; //display latch setup
 
-    WDTCTL = WDTPW + WDTHOLD;
+    WDTCTL = WDTPW + WDTHOLD; //timer registers and interrupts
     TA0CTL = TASSEL_2 + MC_2 + TACLR;
     TA0CCR0 = 50000;
     TA0CCTL0 = CCIE;
