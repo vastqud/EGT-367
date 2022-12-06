@@ -109,8 +109,11 @@ int main() {
     P7DIR |= 0x0C; //display latch setup
 
     WDTCTL = WDTPW + WDTHOLD;
+    TA0CTL = TASSEL_2 + MC_2 + TACLR;
+    TA0CCR0 = 50000;
     TA0CCTL0 = CCIE;
-    //TODO: set up TimerA register
+    _EINT();
+    
     while (1) {
         if (num < 0) {
             num = 59;
